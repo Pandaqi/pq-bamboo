@@ -1,0 +1,40 @@
+{{- $caption := or (.Get "caption") "" -}}
+{{- $features_disabled := or (.Get "disabled") "" -}}
+{{- $feedback_log := or (.Get "fblog") true -}}
+{{- $feedback_result := or (.Get "fbresult") true -}}
+{{- $feedback_keyword := or (.Get "fbkeyword") true -}}
+{{- $feedback_value := or (.Get "fbvalue") true -}}
+{{- $feedback_parser := or (.Get "fbparser") true -}}
+{{- $feedback_comment := or (.Get "fbcomment") true -}}
+{{- $folded := or (.Get "folded") false -}}
+
+<figure class="pq-bamboo no-hover" data-disabled="{{ $features_disabled }}" data-fbresult="{{ $feedback_result }}" data-fblog="{{ $feedback_log }}" data-fbkeyword="{{ $feedback_keyword }}" data-fbvalue="{{ $feedback_value }}" data-fbparser="{{ $feedback_parser }}" data-fbcomment="{{ $feedback_comment }}" data-folded="{{ $folded }}">
+    {{- with $caption -}}
+    <figcaption class="side-note">
+        <span>{{- . -}}</span>
+    </figcaption>
+    {{- end -}}
+    <div class="bamboo-fold">Click to unfold (and show solution)</div>
+    <div class="code-block">
+        <textarea class="code-block-input">{{- .Inner -}}</textarea><!-- don't add spaces here, it messes with the code block white-space retention -->
+    </div>
+    <div class="bamboo-config-btn-container">
+        <button class="bamboo-config-btn masked mask-1" title="Configure">⚙️</button>
+    </div>
+    <div class="bamboo-config-container" style="display: none;">
+        <div class="bamboo-config">
+            <div><strong>Feedback?</strong></div>
+            <div><label for="fblog">Logging ("say")</label> <input name="fblog" type="checkbox" /></div>
+            <div><label for="fbresult">Final result</label> <input name="fbresult" type="checkbox"/></div>
+            <div><label for="fbkeyword">Keywords used</label> <input name="fbkeyword" type="checkbox"/></div>
+            <div><label for="fbvalue">Intermediate values</label> <input name="fbvalue" type="checkbox"/></div>
+            <div><label for="fbparser">Parser</label> <input name="fbparser" type="checkbox"/></div>
+            <div><label for="fbcomment">Comments</label> <input name="fbcomment" type="checkbox"/></div>
+        </div>
+    </div>
+    <div class="bamboo-debug"></div>
+    <div class="parse-result">
+        <div class="parse-result-heading">Results</div>
+        <div class="parse-result-content"></div>
+    </div>
+</figure>

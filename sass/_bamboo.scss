@@ -1,0 +1,268 @@
+@use "sass:map";
+@use "sass:color";
+
+// @TODO: Function names, parameters, etc.
+// @TODO: Lists/Bags
+
+$bg-color: #042719;
+$color: #e4fff5;
+
+$bool: rgb(219, 147, 249);
+$number: rgb(255, 205, 113);
+$string: rgb(103, 201, 210);
+$keyword: rgb(249, 147, 181);
+$native: rgb(86, 219, 86);
+$operator: #a5b1b5; // a grayish mixed with the bg color
+$comment: #679f8a;
+$variable: white;
+$parser: rgb(176, 164, 244);
+
+$line-num-width: 1.5rem;
+$line-num-margin: 1rem;
+$code-block-padding: 1rem;
+
+$colorscheme-feedback: (
+    "bool":     ("frame": 0, "bg": $bool,  "col": rgb(38, 2, 50)),
+    "number":   ("frame": 1, "bg": $number,  "col": rgb(37, 24, 2)),
+    "string":   ("frame": 2, "bg": $string,  "col": rgb(3, 53, 64)),
+    "keyword":  ("frame": 3, "bg": $keyword,  "col": rgb(51, 2, 12)),
+    "log":      ("frame": 4, "bg": $native,    "col": rgb(0, 39, 0)),
+    "error":    ("frame": 5, "bg": rgb(255, 145, 145),  "col": rgb(31, 0, 0)),
+    "parser":   ("frame": 6, "bg": $parser,  "col": rgb(12, 6, 53)),
+    "comment": ("frame": 7, "bg": color.scale($comment, $lightness: 30%), "col": #022014, "italic": true, "opacity": 0.66),
+);
+
+$colorscheme: (
+    "literal-bool": ("frame": 0, "col": color.scale($bool, $lightness: 50%)),
+    "literal-number": ("frame": 1, "col": color.scale($number, $lightness: 50%)),
+    "literal-string": ("frame": 2, "col": color.scale($string, $lightness: 50%)),
+    "keyword": ("frame": 3, "col": color.scale($keyword, $lightness: 50%)),
+    "operator": ("frame": 4, "col": $operator, "bold": true),
+    "comment": ("frame": 5, "col": $comment, "italic": true),
+    "variable": ("frame": 6, "col": $variable, "underline": true),
+    "log": ("frame": 7, "col": color.scale($native, $lightness: 50%)),
+    "delimiter": ("frame": 8, "col": color.scale($parser, $lightness: 50%)),
+);
+
+@mixin style-variations-container($data) { 
+    @if map.get($data, "opacity") { opacity: map.get($data, "opacity"); }
+}
+
+@mixin style-variations($data) {
+    @if map.get($data, "bold") { font-weight: bold; }
+    @if map.get($data, "italic") { font-style: italic; }
+    @if map.get($data, "underline") { text-decoration: underline; }
+}
+
+.pq-bamboo {
+    margin: 0;
+    position: relative;
+    margin-top: 0.5em;
+
+    .code-block-input, .code-block-display
+    {
+        all: unset;
+        box-sizing: border-box;
+    }
+
+    .code-block-display, .code-block-input, .bamboo-config, .bamboo-fold
+    {
+        padding: $code-block-padding;
+        border: 0.25rem solid #eeb850;
+        background-color: $bg-color;
+        border-radius: 0.5rem;
+        box-shadow: inset 0 0 0.25rem black;
+        color: $color;
+    }
+    
+    .code-block
+    {
+        position: relative;
+        width: 100%;
+
+        .code-block-input, .code-block-display
+        {
+            font-family: "JetBrainsMono";
+            font-size: 1em;
+            line-height: 150%;
+            overflow: hidden;
+            //white-space: nowrap;
+        }
+
+        .code-block-input, .code-block-display, .code-block-display * 
+        {
+            tab-size: 2;
+        }
+
+        // @TODO: For some reason, the display is offset 0.5em from the input
+        // This means I need to compensate HERE and with the POSITIONING of block-input
+        // Fix this---where does it come from?
+        // Also because it DOESN'T REALLY WORK
+
+        .code-block-input
+        {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            color: transparent;
+            background-color: transparent;
+            z-index: 10000;
+            resize: none;
+            border-color: transparent;
+            caret-color: white;
+            box-shadow: none;
+            padding-left: $line-num-width + $line-num-margin;
+            appearance: none;
+            white-space: pre-wrap;
+        }
+
+        .code-block-display
+        {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            margin: 0;
+        }
+    }
+
+    .bamboo-fold {
+        cursor: pointer;
+        font-style: italic;
+    }
+
+    .bamboo-config {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5em;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+
+        strong { color: #6ecfb8; }
+        & > div {
+            border: 1px dashed gray;
+            padding: 0.25em;
+            border-radius: 0.25em;
+        }
+    }
+
+    .bamboo-config-btn-container {
+        position: absolute;
+        top: 0.5em;
+        right: 0.5em;
+
+        .bamboo-config-btn {
+            width: 32px;
+            height: 32px;
+            opacity: 0.5;
+            transition: opacity 0.2s, transform 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            &:hover {
+                opacity: 1.0;
+                transform: scale(1.05);
+            }
+        }
+    }
+
+    .parse-result {
+        margin-top: 1em;
+
+        .parse-result-heading {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .parse-result-content {
+
+        }
+    }
+
+
+    
+    // Feedback
+    .bamboo-feedback {
+        display: block;
+        width: 100%;
+        margin: 0.25rem;
+        word-wrap: break-word;
+
+        .line-num {
+            opacity: 0.5;
+            margin-right: 0.5em;
+        }
+
+        .bamboo-final-result {
+            opacity: 0.5;
+        }
+
+        div { 
+            margin: 0; 
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+        }
+
+        @each $name, $data in $colorscheme-feedback {
+            $frame: map.get($data, "frame");
+            $bg: map.get($data, "bg");
+            $col: map.get($data, "col");
+
+            .bamboo-feedback-#{$name} {
+                background-color: $bg;
+                color: $col;
+                strong, em { color: $col; }
+                @include style-variations($data);
+                @include style-variations-container($data);
+            }
+        }
+    }
+
+    .code-block {
+        counter-reset: line-number;
+
+        // Syntax
+        @each $name, $data in $colorscheme {
+            $frame: map.get($data, "frame");
+            $col: map.get($data, "col");
+
+            .#{$name} {
+                color: $col;
+                @include style-variations($data);
+            }
+        }
+
+        .log-statement .keyword {
+            color: map.get(map.get($colorscheme, "log"), "col");
+        }
+
+        .parenthesis {
+            color: gray;
+        }
+
+        .single-line-container {
+            display: block;
+            width: 100%;
+
+            .single-line {
+                display: flex;
+                gap: 1rem;
+                white-space: pre-wrap;
+            }
+
+            .line-number {
+                opacity: 0.5;
+                font-size: 0.7em;
+                margin-left: -1rem;
+                display: block;
+                width: $line-num-width;
+                min-width: $line-num-width;
+                text-align: right;
+            }
+            
+        }
+    }
+}
