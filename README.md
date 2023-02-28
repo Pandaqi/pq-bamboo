@@ -47,15 +47,18 @@ Load the CSS. You can edit it to create your own styling rules.
 Load the JS files. 
 
 * One is a _web worker_. 
-* The other has general nodes and functionality, and can be located anywhere.
+* The other has all nodes and functionality.
 
-Set your path to the web worker (after loading the main library) with
+Both can be located anywhere, but you need to tell them where the other is. (I know, it's ugly, but I saw no better way for now.)
+
+* Within the Web Worker, set the path to the other JS file at the top (`importScripts` function). 
+* After loading the main library, set your path to the web worker with ...
 
 ```
 PQ_BAMBOO.config.webWorkerUrl = "your/path/towards/it.js"
 ```
 
-The Hugo shortcode is optional. Use that if you happen to be using the Hugo website generator.
+The Hugo shortcode is **optional**. Use that if you happen to be using the Hugo website generator.
 
 ### Create code blocks
 
