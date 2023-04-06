@@ -267,6 +267,7 @@ These are to-dos or ideas for the future. Or optional alternative syntaxes I mig
 ### General
 
 * Fix and complete the testing suite 
+* Allow "exp" and "mod" operations between non-numbers? Or at least give a meaningful error message then?
 * Find cleaner implementation for converting something that might be a variable, name or evaluation into a key
   * Saving labels on values ("named literals") actually feels very powerful?
   * Maybe I should streamline that: any literal is automatically saved as a named literal/variable? So we know the exact object we're getting and can just call one function on that.

@@ -1,4 +1,4 @@
-PQ_BAMBOO.SyntaxHighlighter = class {
+export default class SyntaxHighlighter {
     constructor(bb, codeInput, codeDisplay)
     {
         this.bambooBlock = bb;
@@ -71,7 +71,7 @@ PQ_BAMBOO.SyntaxHighlighter = class {
 
         const isTabKey = (ev.key == "Tab");
         if(isTabKey) {
-            const tabString = PQ_BAMBOO.config.tabCharacter.repeat(PQ_BAMBOO.config.tabSize);
+            const tabString = Config.tabCharacter.repeat(Config.tabSize);
             newNode = document.createTextNode(tabString);
             range.insertNode(newNode);
             updateSelection = true;

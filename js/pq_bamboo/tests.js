@@ -1,4 +1,17 @@
-PQ_BAMBOO.Tests = {
+import Parser from "./parser"
+import Variable from "./nodes/names/variable"
+import Literal from "./nodes/dataTypes/literal"
+import Conditional from "./nodes/conditional"
+import Keyword from "./nodes/names/keyword"
+import Comment from "./nodes/structure/comment"
+import LogStatement from "./nodes/statements/logStatement"
+import IfStatement from "./nodes/statements/ifStatement"
+import LoopStatement from "./nodes/statements/loopStatement"
+import FunctionStatement from "./nodes/statements/functionStatement"
+import Assignment from "./nodes/assignment"
+import Statement from "./nodes/statement"
+
+export default {
     runningAll: false,
     profile: false,
     time: true,
@@ -79,7 +92,7 @@ PQ_BAMBOO.Tests = {
         bools()
         {
             const a = console.assert;
-            const p = PQ_BAMBOO.PARSER;
+            const p = Parser;
             const t = this.true.bind(this);
             const f = p.bool;
 
@@ -91,7 +104,7 @@ PQ_BAMBOO.Tests = {
 
         numbers()
         {
-            const p = PQ_BAMBOO.PARSER;
+            const p = Parser;
             const a = console.assert;
             const t = this.true.bind(this);
             const f = p.number;
@@ -113,7 +126,7 @@ PQ_BAMBOO.Tests = {
     
         strings()
         {
-            const p = PQ_BAMBOO.PARSER;
+            const p = Parser;
             const a = console.assert;
             const t = this.true.bind(this);
 
@@ -180,21 +193,20 @@ PQ_BAMBOO.Tests = {
 
         variables() 
         {
-            const p = PQ_BAMBOO.PARSER;
+            const p = Parser;
             const a = console.assert;
             let t = this.trueInstance.bind(this);
-            const n = PQ_BAMBOO.Nodes;
 
             let f = p.variable;
-            a(t(f, "khelkh", n.Variable));
-            a(!t(f, "true", n.Variable));
-            a(t(f, "kle a", n.Variable, " a"));
+            a(t(f, "khelkh", Variable));
+            a(!t(f, "true", Variable));
+            a(t(f, "kle a", Variable, " a"));
 
             f = p.literal;
-            a(t(f, "true", n.Literal));
-            a(t(f, "false", n.Literal));
-            a(t(f, '"hehek"', n.Literal)); // string
-            a(t(f, "3.6309", n.Literal));
+            a(t(f, "true", Literal));
+            a(t(f, "false", Literal));
+            a(t(f, '"hehek"', Literal)); // string
+            a(t(f, "3.6309", Literal));
 
             t = this.true.bind(this);
             f = p.iskeyword;
@@ -206,7 +218,7 @@ PQ_BAMBOO.Tests = {
         //
         arithmetic_plus_min()
         {
-            const p = PQ_BAMBOO.PARSER;
+            const p = Parser;
             const s = p.statement;
             const r = this.toResult.bind(this);
             const a = console.assert;
@@ -221,7 +233,7 @@ PQ_BAMBOO.Tests = {
 
         arithmetic_mult_div()
         {
-            const p = PQ_BAMBOO.PARSER;
+            const p = Parser;
             const s = p.statement;
             const r = this.toResult.bind(this);
             const a = console.assert;
@@ -233,7 +245,7 @@ PQ_BAMBOO.Tests = {
             a(r(s, "5/10", "0.5"));
 
             // it's 5/5/5 = (5/5)/5 = 1/5, right?
-            // @TODO: fix this ordering
+            // TO DO: fix this
             a(r(s, "5/5/5", "5")); 
 
             a(r(s, "5 mod 2", "1"));
@@ -243,7 +255,7 @@ PQ_BAMBOO.Tests = {
 
         artihmetic_exp()
         {
-            const p = PQ_BAMBOO.PARSER;
+            const p = Parser;
             const s = p.statement;
             const r = this.toResult.bind(this);
             const a = console.assert;
@@ -255,7 +267,7 @@ PQ_BAMBOO.Tests = {
 
         arithmetic_factor()
         {
-            const p = PQ_BAMBOO.PARSER;
+            const p = Parser;
             const s = p.statement;
             const r = this.toResult.bind(this);
             const a = console.assert;
@@ -270,17 +282,16 @@ PQ_BAMBOO.Tests = {
         //
         conditionals()
         {
-            const p = PQ_BAMBOO.PARSER;
+            const p = Parser;
             const s = p.conditional;
             const ti = this.trueInstance.bind(this);
             const r = this.toResult.bind(this);
             const a = console.assert;
-            const n = PQ_BAMBOO.Nodes;
 
-            a(ti(s, "5 is 5", n.Conditional));
-            a(ti(s, "both true and true", n.Conditional));
-            a(ti(s, "either true or false", n.Conditional));
-            a(ti(s, "not true", n.Conditional));
+            a(ti(s, "5 is 5", Conditional));
+            a(ti(s, "both true and true", Conditional));
+            a(ti(s, "either true or false", Conditional));
+            a(ti(s, "not true", Conditional));
 
             a(r(s, "5 is 5", true));
             a(r(s, "both true and true", true));
@@ -293,7 +304,7 @@ PQ_BAMBOO.Tests = {
         //
         functions()
         {
-            const p = PQ_BAMBOO.PARSER;
+            const p = Parser;
             const s = p.statement;
             let t = this.true.bind(this);
             if(this.onlyParse) { t = (val) => { return val } }
@@ -322,29 +333,28 @@ PQ_BAMBOO.Tests = {
 
         statements()
         {
-            const p = PQ_BAMBOO.PARSER
+            const p = Parser
             const a = console.assert;
             const ti = this.trueInstance.bind(this);
             const ok = p.oneKeywordStatements;
             const mk = p.multiKeywordStatements;
             const s = p.statement;
-            const n = PQ_BAMBOO.Nodes;
             
-            a(ti(ok, "stop", n.Keyword));
-            a(ti(ok, "output", n.Keyword));
-            a(ti(ok, "unplug", n.Keyword));
-            a(ti(ok, "skip", n.Keyword));
+            a(ti(ok, "stop", Keyword));
+            a(ti(ok, "output", Keyword));
+            a(ti(ok, "unplug", Keyword));
+            a(ti(ok, "skip", Keyword));
 
-            a(ti(mk, "> Comment", n.Comment));
-            a(ti(mk, "say ho", n.LogStatement));
-            a(ti(mk, "if 5 is 5", n.IfStatement));
+            a(ti(mk, "> Comment", Comment));
+            a(ti(mk, "say ho", LogStatement));
+            a(ti(mk, "if 5 is 5", IfStatement));
 
-            a(ti(mk, "repeat 5 times", n.LoopStatement));
-            a(ti(mk, "machine A wants b", n.FunctionStatement));
-            a(ti(mk, "put 5 into VAR", n.Assignment));
+            a(ti(mk, "repeat 5 times", LoopStatement));
+            a(ti(mk, "machine A wants b", FunctionStatement));
+            a(ti(mk, "put 5 into VAR", Assignment));
 
             const loopStatementFull = 'repeat 5 times \n say "WHAT"';
-            a(ti(s, loopStatementFull, n.Statement));
+            a(ti(s, loopStatementFull, Statement));
         }
 
 

@@ -1,56 +1,13 @@
-/*
+import Memory from "./nodes/memory"
+import Block from "./nodes/structure/block"
+import EmptyLine from "./nodes/structure/emptyLine"
+import Parser from "./parser"
 
-"LEXICAL GRAMMAR" (kind of)
-
-Code ::= Block
-Block ::= [Block | Statement]*
-Statement ::= [
-    EmptyLine |
-    Comment | 
-    IfStatement |
-    LogStatement |
-    LoopStatement |
-    StopStatement |
-    FunctionStatement |
-    Assignment |
-    Expr 
-] LineTerminator
-
-Assignment ::= `put` Cond `into` Variable | `change` Variable `by` Cond
-IfStatement ::= `if` Cond
-LogStatement ::= `say` Cond
-LoopStatement ::= `repeat` [Expr `times` | nothing]
-StopStatement ::= `stop`
-FunctionStatement ::= `machine` FunctionName `wants` ParamsList
-Comment ::= `>` stringchars
-EmptyLine ::= [emptychars]*
-
-
-Cond ::= not Cond | Expr [is Cond | or Cond | and Cond | nothing ]
-Expr ::= Term [`+` Expr | `-` Expr]
-Term ::= Factor [`^` Term | `*` Term | `/` Term]
-Factor ::= `(` Cond `)` | Keyword Cond | Variable | FunctionCall | Literal
-
-Literal ::= [symbolOpen] Value [symbolClose]
-FunctionCall ::= `give` ParamsList `to` FunctionName
-ParamsList ::= FunctionParam [`and` FunctionParam]*
-FunctionName ::= FunctionParam ::= (functionchars)*
-Variable ::= (varchars)*
-
-Value ::= Bool | Number | String | nothing => saved as (value, type)
-Bool ::= `true` | `false`
-String ::= `"` [stringchars]* `"`
-Number ::= [integer] [`.` integer]
-
-LineTerminator ::= "\n" | EndOfFile
-
-*/
-
-PQ_BAMBOO.Lexer = class {
+export default class Lexer {
     constructor(cfg)
     {
         this.config = cfg;
-        this.memory = new PQ_BAMBOO.Nodes.Memory(cfg);
+        this.memory = new Memory(cfg);
         this.memoryGlobal = this.memory.pushContext();
         this.memoryGlobal["bamboo"] = {};
     }
@@ -72,7 +29,7 @@ PQ_BAMBOO.Lexer = class {
 
     isInvalid(res)
     {
-        return !(res instanceof PQ_BAMBOO.Nodes.Block);
+        return !(res instanceof Block);
     }
 
     isEmptyLine(text)
@@ -98,7 +55,7 @@ PQ_BAMBOO.Lexer = class {
         if(numOpenDelimiters != numClosingDelimiters) { return null; }
         
         const textSplit = text.split(/[\n]/);
-        const p = PQ_BAMBOO.PARSER;
+        const p = Parser;
         p.setLexer(this);
 
         const statements = [];
@@ -108,7 +65,7 @@ PQ_BAMBOO.Lexer = class {
         {
             lineNumber += 1;
             if(this.isEmptyLine(txt)) { 
-                statements.push(new PQ_BAMBOO.Nodes.EmptyLine(txt, lineNumber)); 
+                statements.push(new EmptyLine(txt, lineNumber)); 
                 continue; 
             }
 
@@ -137,7 +94,7 @@ PQ_BAMBOO.Lexer = class {
         if(invalid) { return null; }
 
         const indentation = [0];
-        let curBlock = new PQ_BAMBOO.Nodes.Block(this);
+        let curBlock = new Block(this);
 
         for(let i = 0; i < statements.length; i++)
         {
@@ -150,7 +107,7 @@ PQ_BAMBOO.Lexer = class {
             // otherwise, if the next line has some indentation (not empty), read it
             if(endOfFile) { nextInd = 0; } 
             else  { 
-                const nextIsNewLine = statements[i+1] instanceof PQ_BAMBOO.Nodes.EmptyLine;
+                const nextIsNewLine = statements[i+1] instanceof EmptyLine;
                 if(!nextIsNewLine) { nextInd = statements[i+1].getSpaceBefore(); }
             }
 
@@ -158,7 +115,7 @@ PQ_BAMBOO.Lexer = class {
             if(goDeeper) { 
                 indentation.push(nextInd); 
 
-                const b = new PQ_BAMBOO.Nodes.Block(this);
+                const b = new Block(this);
                 b.setParentBlock(curBlock);
                 b.setHeader(statements[i]);
                 curBlock = b;
@@ -179,8 +136,6 @@ PQ_BAMBOO.Lexer = class {
                 continue;
             }
         }
-
-        console.log(curBlock);
 
         return curBlock;
     }

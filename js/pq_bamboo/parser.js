@@ -1,3 +1,46 @@
+import Config from "./config"
+import Value from "./nodes/value"
+import Assignment from "./nodes/assignment"
+import Conditional from "./nodes/conditional"
+import Delimiter from "./nodes/delimiter"
+import Expression from "./nodes/expression"
+import Factor from "./nodes/factor"
+import Statement from "./nodes/statement"
+import Term from "./nodes/term"
+
+import BagPop from "./nodes/bag/bagPop"
+import BagPush from "./nodes/bag/bagPush"
+
+import Literal from "./nodes/dataTypes/literal"
+
+import FunctionCall from "./nodes/functions/functionCall"
+import FunctionParameter from "./nodes/functions/functionParameter"
+import ParamList from "./nodes/functions/paramList"
+
+import BagName from "./nodes/names/bagName"
+import BambooKeyword from "./nodes/names/bambooKeyword"
+import FactorKeyword from "./nodes/names/factorKeyword"
+import FunctionName from "./nodes/names/functionName"
+import Keyword from "./nodes/names/keyword"
+import Label from "./nodes/names/label"
+import ValueNamed from "./nodes/names/valueNamed"
+import Variable from "./nodes/names/variable"
+import VariableIndexed from "./nodes/names/variableIndexed"
+
+import OperatorSymbol from "./nodes/operators/operatorSymbol"
+
+import BagStatement from "./nodes/statements/bagStatement"
+import FunctionStatement from "./nodes/statements/functionStatement"
+import IfStatement from "./nodes/statements/ifStatement"
+import LogStatement from "./nodes/statements/logStatement"
+import LoopStatement from "./nodes/statements/loopStatement"
+import SearchStatement from "./nodes/statements/searchStatement"
+
+import StringReplace from "./nodes/string/stringReplace"
+import StringSlice from "./nodes/string/stringSlice"
+
+import Comment from "./nodes/structure/comment"
+
 //
 // Each parser returns another "parser function"
 // This is any function that transforms String -> [parsedResult (nodes), unconsumedResult (string)]
@@ -6,12 +49,8 @@
 // This gave me a great headstart. I rewrote it, though, to be more clear and explicit about how it work
 // Then I added many more helper functions, and build the Bamboo-specific lexer on top of that
 //
-PQ_BAMBOO.Parser = class {
-
-    setLexer(l)
-    {
-        this.lexer = l;
-    }
+const Parser = class {
+    setLexer(l) { this.lexer = l; }
 
     //
     // Core chaining functions
@@ -255,21 +294,21 @@ PQ_BAMBOO.Parser = class {
     //
 
     // Matches a boolean
-    boolReturner = (res) => { return new PQ_BAMBOO.Nodes.Value(res == "true", "bool"); };
+    boolReturner = (res) => { return new Value(res == "true", "bool"); };
     bool = this.choice([this.chars("true"), this.chars("false")], this.boolReturner);
 
     // Matches a full number (int or float)
     // @NOTE: no parseFloat or anything happens, as the exact _string_ typed needs to be maintained!
-    numberReduce = ([i,f]) => { return new PQ_BAMBOO.Nodes.Value(i + f, "number"); }
+    numberReduce = ([i,f]) => { return new Value(i + f, "number"); }
     number = this.seq([this.integer, this.fraction], this.numberReduce);
 
     // Matches a string
-    stringReduce = ([open,content,close]) => { return new PQ_BAMBOO.Nodes.Value(content, "string", open, close); };
+    stringReduce = ([open,content,close]) => { return new Value(content, "string", open, close); };
     string = this.seq([this.char('"'), this.stringChars, this.char('"')], this.stringReduce);
 
 
     // Matches a literal value
-    literalReturner = (val) => { return new PQ_BAMBOO.Nodes.Literal(val); }
+    literalReturner = (val) => { return new Literal(val); }
     literal = this.choice([
         this.bool,
         this.number,
@@ -312,7 +351,7 @@ PQ_BAMBOO.Parser = class {
 
     operator = (c = "+", needsSpace = false) => {
         return (text) => {
-            const reducer = ([s1,op,s2]) => { return new PQ_BAMBOO.Nodes.OperatorSymbol(this.lexer.config, s1,op,s2); }
+            const reducer = ([s1,op,s2]) => { return new OperatorSymbol(this.lexer.config, s1,op,s2); }
 
             let parserSequence = this.seq([this.optSpace, this.chars(c), this.optSpace], reducer);
             if(needsSpace) {  parserSequence = this.seq([this.optSpace, this.chars(c), this.reqSpace], reducer); }
@@ -321,12 +360,12 @@ PQ_BAMBOO.Parser = class {
         }
     }
 
-    keywordReducer = ([s1,k,s2]) => { return new PQ_BAMBOO.Nodes.Keyword(s1,k,s2); }
+    keywordReducer = ([s1,k,s2]) => { return new Keyword(s1,k,s2); }
     keyword = (k) => {
         return this.seq([this.optSpace, this.chars(k), this.reqSpace], this.keywordReducer);
     }
 
-    keywordChoiceList = PQ_BAMBOO.config.keywords.map((elem) => this.charsExact(elem));
+    keywordChoiceList = Config.keywords.map((elem) => this.charsExact(elem));
     iskeyword = this.choice(this.keywordChoiceList);
 
     namedValue = (reducer) => {
@@ -338,27 +377,27 @@ PQ_BAMBOO.Parser = class {
         }
     }
     
-    bagNameReducer = ([v]) => { return new PQ_BAMBOO.Nodes.BagName(v); }
+    bagNameReducer = ([v]) => { return new BagName(v); }
     bagName = this.namedValue(this.bagNameReducer);
 
-    functionNameReducer = ([v]) => { return new PQ_BAMBOO.Nodes.FunctionName(v); }
+    functionNameReducer = ([v]) => { return new FunctionName(v); }
     functionName = this.namedValue(this.functionNameReducer);
 
-    functionParamReducer = ([v]) => { return new PQ_BAMBOO.Nodes.FunctionParameter(v); }
+    functionParamReducer = ([v]) => { return new FunctionParameter(v); }
     functionParameter = this.namedValue(this.functionParamReducer);
 
-    variableReducer = ([v]) => { return new PQ_BAMBOO.Nodes.Variable(this.lexer, v); }
+    variableReducer = ([v]) => { return new Variable(this.lexer, v); }
     variable = this.namedValue(this.variableReducer);
 
-    possessiveReducer = ([s1,p,s2]) => { return new PQ_BAMBOO.Nodes.Delimiter(s1+p+s2, "possessive"); }
+    possessiveReducer = ([s1,p,s2]) => { return new Delimiter(s1+p+s2, "possessive"); }
     possessive = this.seq([this.optSpace, this.chars("'s"), this.optSpace], this.possessiveReducer)
 
-    labelReducer = ([v]) => { return new PQ_BAMBOO.Nodes.Label(v); }
+    labelReducer = ([v]) => { return new Label(v); }
     label = this.seq([
         this.choice([this.literal, this.variable, () => this.evaluation])
     ], this.labelReducer);
 
-    variableIndexedReducer = ([v,p,l]) => { return new PQ_BAMBOO.Nodes.VariableIndexed(v,p,l); }
+    variableIndexedReducer = ([v,p,l]) => { return new VariableIndexed(v,p,l); }
     variableIndexed = this.seq([
         this.variable,
         this.possessive,
@@ -383,13 +422,13 @@ PQ_BAMBOO.Parser = class {
             );
 
             const reducer = ([v1,rest]) => {
-                return new PQ_BAMBOO.Nodes.ParamList(v1, rest);
+                return new ParamList(v1, rest);
             }
             return this.seq([dataType, extraParams], reducer)(text);
         }
     }
 
-    functionCallReducer = ([k1,c,k2,f]) => { return new PQ_BAMBOO.Nodes.FunctionCall(this.lexer,k1,c,k2,f); }
+    functionCallReducer = ([k1,c,k2,f]) => { return new FunctionCall(this.lexer,k1,c,k2,f); }
     
     functionCallWithParams = this.seq([
         this.keyword("give"),
@@ -415,10 +454,10 @@ PQ_BAMBOO.Parser = class {
 
     factorBracket = this.seq(
         [this.char("("), this.optSpace, () => this.evaluation, this.optSpace, this.char(")")],
-        ([o,s1,v,s2,c]) => { return new PQ_BAMBOO.Nodes.Factor(o+s1, v, s2+c); }
+        ([o,s1,v,s2,c]) => { return new Factor(o+s1, v, s2+c); }
     )
 
-    literalNamedReducer = ([n,k,c]) => { return new PQ_BAMBOO.Nodes.ValueNamed(n,k,c); }
+    literalNamedReducer = ([n,k,c]) => { return new ValueNamed(n,k,c); }
     literalNamed = this.seq([
         this.bagName,
         this.keyword("means"),
@@ -457,7 +496,7 @@ PQ_BAMBOO.Parser = class {
 
     termReducer = ([f,data]) => { 
         if(!data) { return f; }
-        return new PQ_BAMBOO.Nodes.Term(f, data.op, data.term); 
+        return new Term(f, data.op, data.term); 
     }
     term = this.seq([this.factor, this.termChoice], this.termReducer);
 
@@ -479,12 +518,12 @@ PQ_BAMBOO.Parser = class {
 
     expressionReducer = ([t,data]) => { 
         if(!data) { return t; }
-        return new PQ_BAMBOO.Nodes.Expression(t, data.op, data.expr); 
+        return new Expression(t, data.op, data.expr); 
     }
     expression = this.seq([this.term,this.exprChoice], this.expressionReducer);
 
     condOneOperator = (op, needsSpace) => {
-        const oneReducer = ([expr,k1,cond]) => { return new PQ_BAMBOO.Nodes.Conditional(null, expr, k1, cond); }
+        const oneReducer = ([expr,k1,cond]) => { return new Conditional(null, expr, k1, cond); }
 
         return this.seq([
             this.expression, 
@@ -494,7 +533,7 @@ PQ_BAMBOO.Parser = class {
     }
 
     condTwoOperator = (kw, op, needsSpace) => {
-        const twoReducer = ([k1,expr,k2,cond]) => { return new PQ_BAMBOO.Nodes.Conditional(k1, expr, k2, cond); }
+        const twoReducer = ([k1,expr,k2,cond]) => { return new Conditional(k1, expr, k2, cond); }
 
         return this.seq([
             this.keyword(kw, needsSpace), 
@@ -504,7 +543,7 @@ PQ_BAMBOO.Parser = class {
         ], twoReducer);
     }
 
-    unaryReducer = ([op,cond]) => { return new PQ_BAMBOO.Nodes.Conditional(null, null, op, cond); }
+    unaryReducer = ([op,cond]) => { return new Conditional(null, null, op, cond); }
     unaryNot = this.choice([
             this.seq([this.operator("!", false), () => this.conditional], this.unaryReducer),
             this.seq([this.operator("not", true), () => this.conditional], this.unaryReducer)
@@ -538,7 +577,7 @@ PQ_BAMBOO.Parser = class {
     
     factorKeywordChoice = () => {
         const arr = [];
-        for(const func of PQ_BAMBOO.config.builtinFunctions)
+        for(const func of Config.builtinFunctions)
         {
             arr.push(this.keyword(func))
         }
@@ -548,12 +587,12 @@ PQ_BAMBOO.Parser = class {
 
     factorKeyword = this.seq(
         [this.factorKeywordChoice(), () => this.conditional],
-        ([k,v]) => { return new PQ_BAMBOO.Nodes.FactorKeyword(k, v); }
+        ([k,v]) => { return new FactorKeyword(k, v); }
     )
 
     bambooGlobalChoice = () => {
         const arr = [];
-        for(const bambooGlobal of PQ_BAMBOO.config.builtinGlobals)
+        for(const bambooGlobal of Config.builtinGlobals)
         {
             arr.push(this.chars(bambooGlobal));
         }
@@ -561,10 +600,10 @@ PQ_BAMBOO.Parser = class {
     }
     bambooKeyword = this.seq(
         [this.keyword("bamboo"), this.bambooGlobalChoice()],
-        ([k1,k2]) => { return new PQ_BAMBOO.Nodes.BambooKeyword(this.lexer,k1,k2); }
+        ([k1,k2]) => { return new BambooKeyword(this.lexer,k1,k2); }
     )
 
-    replaceReducer = ([k1,c1,k2,c2,k3,c3]) => { return new PQ_BAMBOO.Nodes.StringReplace(k1,c1,k2,c2,k3,c3); }
+    replaceReducer = ([k1,c1,k2,c2,k3,c3]) => { return new StringReplace(k1,c1,k2,c2,k3,c3); }
     stringReplace = this.seq([
         this.keyword("replace"),
         () => this.evaluation,
@@ -574,7 +613,7 @@ PQ_BAMBOO.Parser = class {
         () => this.evaluation
     ], this.replaceReducer)
 
-    sliceReducer = ([k1,c1,k2,c2,k3,c3]) => { return new PQ_BAMBOO.Nodes.StringSlice(k1,c1,k2,c2,k3,c3); }
+    sliceReducer = ([k1,c1,k2,c2,k3,c3]) => { return new StringSlice(k1,c1,k2,c2,k3,c3); }
     stringSlice = this.seq([
         this.keyword("select"),
         () => this.evaluation,
@@ -584,7 +623,7 @@ PQ_BAMBOO.Parser = class {
         () => this.evaluation
     ], this.sliceReducer)
 
-    bagPushReducer = ([k1,v,k2,b]) => { return new PQ_BAMBOO.Nodes.BagPush(this.lexer,k1,v,k2,b); }
+    bagPushReducer = ([k1,v,k2,b]) => { return new BagPush(this.lexer,k1,v,k2,b); }
     bagPush = this.seq([
         this.keyword("add"),
         this.choice([
@@ -595,7 +634,7 @@ PQ_BAMBOO.Parser = class {
         this.bagName
     ], this.bagPushReducer)
 
-    bagPopReducer = ([k1,key,k2,k3,b]) => { return new PQ_BAMBOO.Nodes.BagPop(this.lexer,k1,key,k2,k3,b); }
+    bagPopReducer = ([k1,key,k2,k3,b]) => { return new BagPop(this.lexer,k1,key,k2,k3,b); }
     bagPop = this.seq([
         this.keyword("take"),
         this.choice([
@@ -620,7 +659,7 @@ PQ_BAMBOO.Parser = class {
 
     // @TODO: probably just rewrite this into separate cases, 
     // much cleaner to read (with no performance hit)
-    loopReducer = ([k1,c,k2]) => { return new PQ_BAMBOO.Nodes.LoopStatement(k1,c,k2); }
+    loopReducer = ([k1,c,k2]) => { return new LoopStatement(k1,c,k2); }
     blockSomeReducer = (res) => { return res[0]; } // take the first thing from each list
     loopStatement = this.seq(
         [
@@ -631,7 +670,7 @@ PQ_BAMBOO.Parser = class {
         this.loopReducer
     )
 
-    searchReducer = ([k,v]) => { return new PQ_BAMBOO.Nodes.SearchStatement(k,v); }
+    searchReducer = ([k,v]) => { return new SearchStatement(k,v); }
     searchStatement = this.seq(
         [
             this.keyword("search"),
@@ -640,7 +679,7 @@ PQ_BAMBOO.Parser = class {
         this.searchReducer
     )
 
-    functionStatementReducer = ([k1,v,k2,p]) => { return new PQ_BAMBOO.Nodes.FunctionStatement(k1,v,k2,p); }
+    functionStatementReducer = ([k1,v,k2,p]) => { return new FunctionStatement(k1,v,k2,p); }
     functionStatement = this.seq(
         [
             this.keyword("machine"),
@@ -651,16 +690,16 @@ PQ_BAMBOO.Parser = class {
         this.functionStatementReducer
     );
 
-    commentReducer = ([op,content]) => { return new PQ_BAMBOO.Nodes.Comment(op, content); }
+    commentReducer = ([op,content]) => { return new Comment(op, content); }
     comment = this.seq([
         this.choice([this.char(">"), this.keyword("comment")]),
         this.stringChars
     ], this.commentReducer);
 
-    logReducer = ([k,c]) => { return new PQ_BAMBOO.Nodes.LogStatement(k,c); }
+    logReducer = ([k,c]) => { return new LogStatement(k,c); }
     logStatement = this.seq([this.keyword("say"), this.evaluation], this.logReducer);
 
-    assignmentReducer = ([k1,c,k2,v]) => { return new PQ_BAMBOO.Nodes.Assignment(k1,c,k2,v); }
+    assignmentReducer = ([k1,c,k2,v]) => { return new Assignment(k1,c,k2,v); }
     assignmentNow = this.seq([
         this.keyword("now"),
         this.variable,
@@ -694,10 +733,10 @@ PQ_BAMBOO.Parser = class {
         this.assignmentDelete
     ]);
 
-    ifReducer = ([k,s,cond]) => { return new PQ_BAMBOO.Nodes.IfStatement(k, s, cond); }
+    ifReducer = ([k,s,cond]) => { return new IfStatement(k, s, cond); }
     ifStatement = this.seq([this.keyword("if"), this.evaluation], this.ifReducer);
 
-    bagReducer = ([k1,v,k2]) => { return new PQ_BAMBOO.Nodes.BagStatement(k1, v, k2); }
+    bagReducer = ([k1,v,k2]) => { return new BagStatement(k1, v, k2); }
     bagStatement = this.seq([
         this.keyword("bag"),
         this.bagName,
@@ -727,9 +766,10 @@ PQ_BAMBOO.Parser = class {
 
     statement = this.choice(
         [this.oneKeywordStatements, this.multiKeywordStatements],
-        (val) => { return new PQ_BAMBOO.Nodes.Statement(val); }
+        (val) => { return new Statement(val); }
     )
   
 }
 
-PQ_BAMBOO.PARSER = new PQ_BAMBOO.Parser();
+const p = new Parser();
+export default p;

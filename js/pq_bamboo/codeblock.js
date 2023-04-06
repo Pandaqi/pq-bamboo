@@ -1,51 +1,46 @@
-// @NOTE: ended up switching to another approach: an invisible <textarea> overlaying the actually styled div
-// @SOURCE: https://css-tricks.com/creating-an-editable-textarea-that-supports-syntax-highlighted-code/
-// Modified and extended _a lot_ for my purposes.
-//
-PQ_BAMBOO.CodeBlock = class {
+import SyntaxHighlighter from "./highlighter"
+import Config from "./config"
+
+export default class CodeBlock {
     constructor(params)
     {
-        this.setupHTML(params);
-        this.setConfigInputs();
-        this.removeEmptyLinesAtStart();
-        this.setupFoldableBlock();
-        this.setupConfigInteraction();
+        this.node = params.node;
 
-        this.highlighter = new PQ_BAMBOO.SyntaxHighlighter(this, this.codeInput, this.codeDisplay);
+        this.setupHTML();
+
+        this.parseResult = this.node.getElementsByClassName("parse-result")[0];
+        this.feedback = this.parseResult.getElementsByClassName("parse-result-content")[0];
+        this.debug = this.node.getElementsByClassName("bamboo-debug")[0];
+        this.configForm = this.node.getElementsByClassName("bamboo-config-container")[0];
+
+        const that = this;
+
+        this.foldNode = this.node.getElementsByClassName("bamboo-fold")[0];
+        if(this.isFolded()) {
+            this.codeContainer.style.display = 'none';
+            this.parseResult.style.display = 'none';
+            this.foldNode.addEventListener('click', this.unfold.bind(this));
+        } else {
+            this.foldNode.style.display = 'none';
+        }
+
+        this.configButton = this.node.getElementsByClassName("bamboo-config-btn")[0];
+        this.configButton.addEventListener("click", (ev) => {
+            const isVisible = that.configForm.style.display == "block";
+            
+            if(isVisible) { that.configForm.style.display = "none"; }
+            else { that.configForm.style.display = "block"; }
+
+            ev.preventDefault();
+            ev.stopPropagation();
+            return false;
+        })
+
+        this.highlighter = new SyntaxHighlighter(this, this.codeInput, this.codeDisplay);
         this.codeInput.addEventListener("input", this.onInput.bind(this));
 
         const executeAtInit = !this.isFolded();
         if(executeAtInit) { this.onInput(); }
-    }
-
-    setupFoldableBlock()
-    {
-        if(!this.isFolded())
-        {
-            this.foldNode.style.display = 'none';
-            return;
-        }
-
-        this.codeContainer.style.display = 'none';
-        this.parseResult.style.display = 'none';
-        this.foldNode.addEventListener('click', this.unfold.bind(this));
-    }
-
-    setupConfigInteraction()
-    {
-        this.configButton.addEventListener("click", this.onConfigClicked.bind(this));
-    }
-
-    onConfigClicked(ev)
-    {
-        const isVisible = this.configForm.style.display == "block";
-        
-        if(isVisible) { this.configForm.style.display = "none"; }
-        else { this.configForm.style.display = "block"; }
-
-        ev.preventDefault();
-        ev.stopPropagation();
-        return false;
     }
 
     isFolded()
@@ -74,7 +69,7 @@ PQ_BAMBOO.CodeBlock = class {
 
         if(this.thread) { this.thread.terminate(); }
         
-        this.thread = new Worker(PQ_BAMBOO.config.workerURL);
+        this.thread = new Worker(Config.workerURL);
         this.thread.addEventListener('message', this.finishExecuting.bind(this));
 
         let message = { code: content, config: this.getConfig() };
@@ -111,22 +106,8 @@ PQ_BAMBOO.CodeBlock = class {
         n.innerHTML = txt;
     }
 
-    // @IMPROV: this code is very repetitive, generalize
-    // But I couldn't generalize easily while writing the first version, because each element needs
-    //  - a different class
-    //  - sometimes a different parent
-    //  - sometimes even more properties set
-    setupHTML(params)
+    setupHTML()
     {
-        this.node = params.node;
-        if(!params.node)
-        {
-            this.node = document.createElement("figure");
-            this.node.classList.add("pq-bamboo");
-            params.parent.appendChild(this.node);
-        }
-
-        // code input (hidden textarea) and display (styled div)
         this.codeContainer = this.node.getElementsByClassName("code-block")[0];
 
         this.codeInput = this.node.getElementsByClassName("code-block-input");
@@ -146,62 +127,10 @@ PQ_BAMBOO.CodeBlock = class {
         }
 
         this.codeDisplay.setAttribute("spellcheck", false);
-        this.codeInput.setAttribute("spellcheck", false);
+        this.codeInput.setAttribute("spellcheck", false)
 
-        // node for folding/unfolding code block
-        this.foldNode = this.node.getElementsByClassName("bamboo-fold");
-        if(this.foldNode.length > 0) { this.foldNode = this.foldNode[0]; }
-        else {
-            this.foldNode = document.createElement("div");
-            this.foldNode.classList.add("bamboo-fold");
-            this.node.appendChild(this.foldNode);
-        }
-
-        // config form and button to toggle it
-        this.configForm = this.node.getElementsByClassName("bamboo-config-container");
-        if(this.configForm.length > 0) { this.configForm = this.configForm[0]; }
-        else {
-            this.configForm = document.createElement("div");
-            this.configForm.classList.add("bamboo-config-container");
-            this.node.appendChild(this.configForm)
-        }
-
-        this.configButton = this.configForm.getElementsByClassName("bamboo-config-btn");
-        if(this.configButton.length > 0) { this.configButton = this.configButton[0]; }
-        else {
-            this.configButton = document.createElement("button");
-            this.configButton.classList.add("bamboo-config-btn");
-            this.configButton.title = "Configure";
-            this.configButton.innerHTML = "⚙️";
-            this.configForm.appendChild(this.configButton);
-        }
-
-        // parsing feedback and result
-        this.parseResult = this.node.getElementsByClassName("parse-result");
-        if(this.parseResult.length > 0) { this.parseResult = this.parseResult[0]; }
-        else {
-            this.parseResult = document.createElement("div");
-            this.parseResult.classList.add("parse-result");
-            this.node.appendChild(this.parseResult);
-        }
-
-        this.feedback = this.parseResult.getElementsByClassName("parse-result-content");
-        if(this.feedback.length > 0) { this.feedback = this.feedback[0]; }
-        else {
-            this.feedback = document.createElement("div");
-            this.feedback.classList.add("parse-result-content");
-            this.parseResult.appendChild(this.feedback);
-        }
-
-        // debug (only for developing, nothing else)
-        this.debug = this.node.getElementsByClassName("bamboo-debug");
-        if(this.debug.length > 0) { this.debug = this.debug[0]; }
-        else {
-            this.debug = document.createElement("div");
-            this.debug.classList.add("bamboo-debug");
-            this.node.appendChild(this.debug);
-        }
-        
+        this.setConfigInputs();
+        this.removeEmptyLinesAtStart();
     }
 
     // set config form (the actual checkboxes) based on dataset values
