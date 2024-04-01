@@ -264,6 +264,12 @@ Any global functionality (that needs no value(s) as input) is accessible as `bam
 
 These are to-dos or ideas for the future. Or optional alternative syntaxes I might implement.
 
+### TypeScript
+
+After conversion to TypeScript, many of the different classes accept parameters of type `any`. Why? Because those values could be a number of different objects (Factor, Term, Value, ...), but I currently don't have one super class from which they all inherit.
+
+So, make that superclass, have everything else extend that.
+
 ### General
 
 * Fix and complete the testing suite 
