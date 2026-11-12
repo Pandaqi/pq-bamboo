@@ -2,7 +2,7 @@
 
 Bamboo was made to introduce people to programming. It has a limited set of features and terrible performance (if you want to do anything serious with it).
 
-Because he language aims to read like English at all times.
+The language aims to read like simple English at all times.
 
 * **Each line is one statement.** (Empty lines are just ignored)
 * **Everything uses _words_ as operators.** (Symbols are supported too, though.)
