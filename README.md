@@ -18,7 +18,7 @@ I built this for my tutorials on [Pandaqi Tutorials](https://pandaqi.com/tutoria
 
 Here's what Bamboo looks like on my website.
 
-![Visual of a highlighted Bamboo code block](pq-bamboo-header.webp)
+![Visual of a highlighted Bamboo code block](docs/pq-bamboo-header.webp)
 
 The parser is, therefore, **three things in one**:
 

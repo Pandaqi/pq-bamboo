@@ -8,7 +8,7 @@ Below is a high-level overview of the "grammar" of this language.
 
 It's a nice way to see the full syntax and how everything connects in general. It may also be interesting to people who want to create their own programing language.
 
-![Overview of (almost) full Bamboo grammar](bamboo-grammar.webp)
+![Overview of (almost) full Bamboo grammar](docs/bamboo-grammar.webp)
 
 ## Developer Diary
 
