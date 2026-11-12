@@ -487,7 +487,7 @@ const Parser = class
 
     termChoice = this.choice(
         [
-            this.termOperator("^", false,),
+            this.termOperator("^", false),
             this.termOperator("exp", true),
             this.termOperator("*", false),
             this.termOperator("times", true),

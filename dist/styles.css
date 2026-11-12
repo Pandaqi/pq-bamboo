@@ -1,0 +1,233 @@
+.pq-bamboo {
+  margin: 0;
+  position: relative;
+  margin-top: 0.5em;
+}
+.pq-bamboo .code-block-input, .pq-bamboo .code-block-display {
+  all: unset;
+  box-sizing: border-box;
+}
+.pq-bamboo .code-block-display, .pq-bamboo .code-block-input, .pq-bamboo .bamboo-config, .pq-bamboo .bamboo-fold {
+  padding: 1rem;
+  border: 0.25rem solid #eeb850;
+  background-color: #042719;
+  border-radius: 0.5rem;
+  box-shadow: inset 0 0 0.25rem black;
+  color: #e4fff5;
+}
+.pq-bamboo .code-block {
+  position: relative;
+  width: 100%;
+}
+.pq-bamboo .code-block .code-block-input, .pq-bamboo .code-block .code-block-display {
+  font-family: "JetBrainsMono";
+  font-size: 1em;
+  line-height: 150%;
+  overflow: hidden;
+}
+.pq-bamboo .code-block .code-block-input, .pq-bamboo .code-block .code-block-display, .pq-bamboo .code-block .code-block-display * {
+  tab-size: 2;
+}
+.pq-bamboo .code-block .code-block-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  color: transparent;
+  background-color: transparent;
+  z-index: 10000;
+  resize: none;
+  border-color: transparent;
+  caret-color: white;
+  box-shadow: none;
+  padding-left: 2.5rem;
+  appearance: none;
+  white-space: pre-wrap;
+}
+.pq-bamboo .code-block .code-block-display {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  margin: 0;
+}
+.pq-bamboo .bamboo-fold {
+  cursor: pointer;
+  font-style: italic;
+}
+.pq-bamboo .bamboo-config {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+.pq-bamboo .bamboo-config strong {
+  color: #6ecfb8;
+}
+.pq-bamboo .bamboo-config > div {
+  border: 1px dashed gray;
+  padding: 0.25em;
+  border-radius: 0.25em;
+}
+.pq-bamboo .bamboo-config-btn-container {
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
+}
+.pq-bamboo .bamboo-config-btn-container .bamboo-config-btn {
+  width: 32px;
+  height: 32px;
+  opacity: 0.5;
+  transition: opacity 0.2s, transform 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.pq-bamboo .bamboo-config-btn-container .bamboo-config-btn:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+.pq-bamboo .parse-result {
+  margin-top: 1em;
+}
+.pq-bamboo .parse-result .parse-result-heading {
+  text-align: center;
+  font-weight: bold;
+}
+.pq-bamboo .bamboo-feedback {
+  display: block;
+  width: 100%;
+  margin: 0.25rem;
+  word-wrap: break-word;
+}
+.pq-bamboo .bamboo-feedback .line-num {
+  opacity: 0.5;
+  margin-right: 0.5em;
+}
+.pq-bamboo .bamboo-feedback .bamboo-final-result {
+  opacity: 0.5;
+}
+.pq-bamboo .bamboo-feedback div {
+  margin: 0;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-bool {
+  background-color: rgb(219, 147, 249);
+  color: rgb(38, 2, 50);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-bool strong, .pq-bamboo .bamboo-feedback .bamboo-feedback-bool em {
+  color: rgb(38, 2, 50);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-number {
+  background-color: rgb(255, 205, 113);
+  color: rgb(37, 24, 2);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-number strong, .pq-bamboo .bamboo-feedback .bamboo-feedback-number em {
+  color: rgb(37, 24, 2);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-string {
+  background-color: rgb(103, 201, 210);
+  color: rgb(3, 53, 64);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-string strong, .pq-bamboo .bamboo-feedback .bamboo-feedback-string em {
+  color: rgb(3, 53, 64);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-keyword {
+  background-color: rgb(249, 147, 181);
+  color: rgb(51, 2, 12);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-keyword strong, .pq-bamboo .bamboo-feedback .bamboo-feedback-keyword em {
+  color: rgb(51, 2, 12);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-log {
+  background-color: rgb(86, 219, 86);
+  color: rgb(0, 39, 0);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-log strong, .pq-bamboo .bamboo-feedback .bamboo-feedback-log em {
+  color: rgb(0, 39, 0);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-error {
+  background-color: rgb(255, 145, 145);
+  color: rgb(31, 0, 0);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-error strong, .pq-bamboo .bamboo-feedback .bamboo-feedback-error em {
+  color: rgb(31, 0, 0);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-parser {
+  background-color: rgb(176, 164, 244);
+  color: rgb(12, 6, 53);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-parser strong, .pq-bamboo .bamboo-feedback .bamboo-feedback-parser em {
+  color: rgb(12, 6, 53);
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-comment {
+  background-color: rgb(58.2745098039%, 73.6470588235%, 67.8823529412%);
+  color: #022014;
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-comment strong, .pq-bamboo .bamboo-feedback .bamboo-feedback-comment em {
+  color: #022014;
+}
+.pq-bamboo .bamboo-feedback .bamboo-feedback-comment {
+  font-style: italic;
+  opacity: 0.66;
+}
+.pq-bamboo .code-block {
+  counter-reset: line-number;
+}
+.pq-bamboo .code-block .literal-bool {
+  color: #edc9fc;
+}
+.pq-bamboo .code-block .literal-number {
+  color: #ffe6b8;
+}
+.pq-bamboo .code-block .literal-string {
+  color: rgb(70.1960784314%, 89.4117647059%, 91.1764705882%);
+}
+.pq-bamboo .code-block .keyword {
+  color: #fcc9da;
+}
+.pq-bamboo .code-block .operator {
+  color: #a5b1b5;
+  font-weight: bold;
+}
+.pq-bamboo .code-block .comment {
+  color: #679f8a;
+  font-style: italic;
+}
+.pq-bamboo .code-block .variable {
+  color: white;
+  text-decoration: underline;
+}
+.pq-bamboo .code-block .log {
+  color: rgb(66.862745098%, 92.9411764706%, 66.862745098%);
+}
+.pq-bamboo .code-block .delimiter {
+  color: rgb(84.5098039216%, 82.1568627451%, 97.8431372549%);
+}
+.pq-bamboo .code-block .log-statement .keyword {
+  color: rgb(66.862745098%, 92.9411764706%, 66.862745098%);
+}
+.pq-bamboo .code-block .parenthesis {
+  color: gray;
+}
+.pq-bamboo .code-block .single-line-container {
+  display: block;
+  width: 100%;
+}
+.pq-bamboo .code-block .single-line-container .single-line {
+  display: flex;
+  gap: 1rem;
+  white-space: pre-wrap;
+}
+.pq-bamboo .code-block .single-line-container .line-number {
+  opacity: 0.5;
+  font-size: 0.7em;
+  margin-left: -1rem;
+  display: block;
+  width: 1.5rem;
+  min-width: 1.5rem;
+  text-align: right;
+}
